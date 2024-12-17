@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar } from "@material-tailwind/react";
 import { List, ListItem, Card } from "@material-tailwind/react";
 import {
@@ -10,10 +10,41 @@ import {
   } from "@material-tailwind/react";
   import Paid from "@/components/Paid";
   import Not_Paid from "@/components/Not_Paid";
+  import { request } from "@/request";
 
 const Setting = () => {
-    const [activeTab, setActiveTab] = React.useState("html");
-    const [currentView, setCurrentView] = React.useState("settings"); // "settings" or "paid"
+  const entity = 'RoomBooking//bookings';
+  const [paidBookings, setPaidBookings] = useState([]);
+  const [pendingBookings, setPendingBookings] = useState([]);  // State cho các booking chưa thanh toán
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("html");
+  const [currentView, setCurrentView] = useState("settings");
+  
+   // Hàm lấy dữ liệu
+   const fetchBookings = async () => {
+    setLoading(true);
+    try {
+      const options = { userId: 'ee53a89d-3814-4733-8e5a-7b5cbf68615d' };
+      const response = await request.list({ entity, options });
+      const bookings = response.result.pageItems || [];
+      console.log("Bookings received:", bookings);
+      
+      // Lọc các booking đã thanh toán
+      const paid = bookings.filter((booking) => booking.paymentStatus === "Success");
+      setPaidBookings(paid);
+
+      // Lọc các booking chưa thanh toán (Pending)
+      const pending = bookings.filter((booking) => booking.paymentStatus === "Pending");
+      setPendingBookings(pending);
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu:", error);
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+   
     const data = [
         {
           label: "Thông tin tài khoản",
@@ -54,7 +85,7 @@ const Setting = () => {
                 <div className="flex flex-col font-bold gap-5">
                 
                 <List>
-                    <ListItem  onClick={() => setCurrentView("paid")}>
+                    <ListItem  onClick={() => { setCurrentView("paid"); fetchBookings(); }}>
                     <div className="flex flex-row items-center gap-3">
                         <img src="/img/icon/pen.png" className="w-[25px] h-[25px]" />
                         <p>Đặt chỗ của tôi</p>
@@ -127,7 +158,7 @@ const Setting = () => {
                   ))}
                 </TabsHeader>
                 <TabsBody>
-                  {data.map(({ value, desc }) => (
+                {data.map(({ value, desc }) => (
                     <TabPanel key={value} value={value}>
                       {desc}
                     </TabPanel>
@@ -137,15 +168,51 @@ const Setting = () => {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {/* Paid Component */}
-              <div className="">
-                <Paid />
-              </div>
+              {loading ? (
+                <p>Đang tải dữ liệu...</p>
+              ) : error ? (
+                <p>Lỗi khi tải dữ liệu.</p>
+              ) : (
+                <>
+                  {/* Hiển thị các phòng đã thanh toán */}
+                  {paidBookings.length > 0 ? (
+                    paidBookings.map((booking) => (
+                      <Paid
+                      key={`${booking.id}-${booking.roomNumber}`} 
+                        config={{
+                          roomNumber: booking.roomNumber,
+                          checkInDate: booking.checkInDate,
+                          checkOutDate: booking.checkOutDate,
+                          price: booking.price,
+                          bookingReference: booking.bookingReference,
+                          
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <p>Không có đặt chỗ nào đã thanh toán.</p>
+                  )}
 
-              {/* Not Paid Component */}
-              <div className="">
-                <Not_Paid />
-              </div>
+                  {/* Hiển thị các phòng chưa thanh toán */}
+                  {pendingBookings.length > 0 ? (
+                    pendingBookings.map((booking) => (
+                      <Not_Paid
+                        key={booking.id}
+                        config={{
+                          roomNumber: booking.roomNumber,
+                          checkInDate: booking.checkInDate,
+                          checkOutDate: booking.checkOutDate,
+                          price: booking.price,
+                          bookingReference: booking.bookingReference,
+                          
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <p>Không có đặt chỗ nào chưa thanh toán.</p>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>
