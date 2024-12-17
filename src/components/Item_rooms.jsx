@@ -25,6 +25,7 @@ import {
     onMouseEnter: () => setOpenPopover(true),
     onMouseLeave: () => setOpenPopover(false),
   };
+  console.log("điểm đánh giá phòng: "+config.roomNumber +" " + Math.floor(parseFloat(config?.averageRating||0)));
 
   const {formatCurrency} = useMoney () ;
     return (
@@ -144,7 +145,10 @@ import {
                     src="/img/user.png"className="w-[15px] h-[15px]"/>
                     <p className="text-[18px]">{config.numberOfPeople}</p>  
                 </div>
-                <div className="flex gap-3 items-center"><Rating value={parseFloat(config.averageRating ? config.averageRating : 0)} readonly />
+                <div className="flex gap-3 items-center">
+
+                  <Rating value={Math.floor(parseFloat(config?.averageRating||0))} readonly />
+
                 <p>({config.totalFeedbacks})</p>
                 </div>    
             </div>
@@ -156,7 +160,7 @@ import {
                 <p className="text-gray-500 ms-1">Đêm</p>
                 </div>
                 <Link to="/pages/room_detail" 
-                 state={{ config }} // Truyền dữ liệu thông qua state
+                 state={{ id: config.id }} // Truyền dữ liệu thông qua state
                 >
   <Button variant="outlined" className="rounded-full">
     Chọn

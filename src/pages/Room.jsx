@@ -3,24 +3,29 @@ import Header from "@/components/Header";
 import { NavbarWithMegaMenu } from "./Navigation";
 import Item_rooms from "@/components/Item_rooms";
 import { request } from "@/request";
-import { Button } from "@material-tailwind/react";
-import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import Footer from "./Footer";
 
 const Room = () => {
-  const [data, setData] = useState([]);
+  const [roomsByType, setRoomsByType] = useState({});
   const [activePage, setActivePage] = useState(1); // Số trang hiện tại
   const [totalPages, setTotalPages] = useState(1); // Tổng số trang
 
   const entity = "room";
-  const itemsPerPage = 8; // Số lượng item mỗi trang
+  const itemsPerPage = 1; // Số lượng item mỗi trang
 
   const fetchData = async (page) => {
     try {
       const options = { items: itemsPerPage, page };
       const response = await request.list({ entity, options });
 
-      setData(response.result.pageItems);
+      const groupedData = response.result.pageItems.reduce((acc, room) => {
+        const roomType = room.roomTypeName || "Khác";
+        if (!acc[roomType]) acc[roomType] = [];
+        acc[roomType].push(room);
+        return acc;
+      }, {});
+
+      setRoomsByType(groupedData);
       setActivePage(response.result.page); // Cập nhật trang hiện tại
       setTotalPages(Math.ceil(response.result.count / itemsPerPage)); // Tính tổng số trang
     } catch (error) {
@@ -45,40 +50,41 @@ const Room = () => {
     <div>
       <Header />
       <NavbarWithMegaMenu />
-      <div className="mx-auto max-w-screen-xl px-4 py-2 w-full mt-8 flex flex-col gap-3">
+      <div className="mx-auto max-w-screen-xl px-4 py-2 w-full mt-8 flex flex-col gap-6">
         <div>
           <p className="text-[30px] font-bold">Danh sách tất cả các phòng</p>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          {data.map((room) => (
-            <Item_rooms key={room.id} config={room} />
-          ))}
-        </div>
+        {Object.entries(roomsByType).map(([roomType, rooms]) => (
+          <div key={roomType} className="flex flex-col gap-4">
+            <h2 className="text-[24px] font-semibold">{roomType}</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {rooms.map((room) => (
+                <Item_rooms key={room.id} config={room} />
+              ))}
+            </div>
+          </div>
+        ))}
         {/* Phân trang */}
         <div className="relative flex items-center justify-center mt-4">
-  
-            <p>Trang {activePage} trên {totalPages}</p>
+          <p>
+            Trang {activePage} trên {totalPages}
+          </p>
           <div className="absolute end-0 flex">
-          <Button
-            variant="text"
-            className="flex items-center gap-2 rounded-full"
-            onClick={handlePrevious}
-            disabled={activePage === 1}
-          >
-            <ArrowLeftIcon strokeWidth={2} className="h-4 w-4" /> Trước
-          </Button>
-          
-          <Button
-            variant="text"
-            className="flex items-center gap-2 rounded-full"
-            onClick={handleNext}
-            disabled={activePage === totalPages}
-          >
-            Sau
-            <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
-          </Button>
+            <button
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg"
+              onClick={handlePrevious}
+              disabled={activePage === 1}
+            >
+              Trước
+            </button>
+            <button
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg"
+              onClick={handleNext}
+              disabled={activePage === totalPages}
+            >
+              Sau
+            </button>
           </div>
-          
         </div>
       </div>
       <Footer />

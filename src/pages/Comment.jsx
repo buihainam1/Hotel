@@ -31,28 +31,27 @@ function StarIcon() {
 
 
 const Comment = () => {
-  const [data, setData] = useState([]);
-  const entity = 'room/feedback';
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await request.list({ entity});
-      setData(response.result);
-      console.log(response.result);
-    };
+  // const [data, setData] = useState([]);
+  // const entity = 'room/feedback';
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const response = await request.list({ entity});
+  //     setData(response.result);
+  //     console.log(response.result);
+  //   };
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
     return (
         <div className="mx-auto max-w-screen-xl px-4 py-2 w-full mt-8 ">
         <div className="flex flex-row justify-center">
         <p className="text-[30px] font-bold ">Các đánh giá gần đây</p>
         </div>
         <div className="mt-5">
-        {data.map((datacmt) => (
         <Item_Comment 
-        config = {datacmt}
+        //config = {datacmt}
         />
-        ))}
+       
         
         </div>
          
