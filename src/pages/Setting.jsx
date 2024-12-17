@@ -8,9 +8,12 @@ import {
     Tab,
     TabPanel,
   } from "@material-tailwind/react";
+  import Paid from "@/components/Paid";
+  import Not_Paid from "@/components/Not_Paid";
 
 const Setting = () => {
     const [activeTab, setActiveTab] = React.useState("html");
+    const [currentView, setCurrentView] = React.useState("settings"); // "settings" or "paid"
     const data = [
         {
           label: "Thông tin tài khoản",
@@ -51,7 +54,7 @@ const Setting = () => {
                 <div className="flex flex-col font-bold gap-5">
                 
                 <List>
-                    <ListItem>
+                    <ListItem  onClick={() => setCurrentView("paid")}>
                     <div className="flex flex-row items-center gap-3">
                         <img src="/img/icon/pen.png" className="w-[25px] h-[25px]" />
                         <p>Đặt chỗ của tôi</p>
@@ -99,38 +102,53 @@ const Setting = () => {
                 </div>
             </div>
             </div>
+            {/* Main Content */}
             <div className="w-3/5 flex flex-col">
+          {currentView === "settings" ? (
             <div className="flex flex-col mt-5">
-                <p className="font-bold text-[25px]">Cài đặt</p>
-                <Tabs value={activeTab}>
-      <TabsHeader
-        className="rounded-none border-b border-blue-gray-50 bg-transparent p-0"
-        indicatorProps={{
-          className:
-            "bg-transparent border-b-2 border-gray-900 shadow-none rounded-none",
-        }}
-      >
-        {data.map(({ label, value }) => (
-          <Tab
-            key={value}
-            value={value}html
-            onClick={() => setActiveTab(value)}
-            className={activeTab === value ? "text-[#1BA0E2]" : ""}
-          >
-            {label}
-          </Tab>
-        ))}
-      </TabsHeader>
-      <TabsBody>
-        {data.map(({ value, desc }) => (
-          <TabPanel key={value} value={value}>
-            {desc}
-          </TabPanel>
-        ))}
-      </TabsBody>
-    </Tabs>
+              <p className="font-bold text-[25px]">Cài đặt</p>
+              <Tabs value={activeTab}>
+                <TabsHeader
+                  className="rounded-none border-b border-blue-gray-50 bg-transparent p-0"
+                  indicatorProps={{
+                    className:
+                      "bg-transparent border-b-2 border-gray-900 shadow-none rounded-none",
+                  }}
+                >
+                  {data.map(({ label, value }) => (
+                    <Tab
+                      key={value}
+                      value={value}
+                      onClick={() => setActiveTab(value)}
+                      className={activeTab === value ? "text-[#1BA0E2]" : ""}
+                    >
+                      {label}
+                    </Tab>
+                  ))}
+                </TabsHeader>
+                <TabsBody>
+                  {data.map(({ value, desc }) => (
+                    <TabPanel key={value} value={value}>
+                      {desc}
+                    </TabPanel>
+                  ))}
+                </TabsBody>
+              </Tabs>
             </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {/* Paid Component */}
+              <div className="">
+                <Paid />
+              </div>
+
+              {/* Not Paid Component */}
+              <div className="">
+                <Not_Paid />
+              </div>
             </div>
+          )}
+        </div>
         </div>
         </div>
         
